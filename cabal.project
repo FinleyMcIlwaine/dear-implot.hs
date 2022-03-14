@@ -1,2 +1,5 @@
-packages: . ../../haskell-game/dear-imgui.hs/ ../pipes-pulse-simple/
-flags: +sdl +opengl2 -vulkan
+packages: *.cabal
+package dear-imgui
+  flags: -sdl +glfw
+package dear-implot
+  ghc-options: -Wall -Wcompat -fno-warn-unused-do-bind

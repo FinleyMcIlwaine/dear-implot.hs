@@ -1,56 +1,85 @@
 {-# LANGUAGE BlockArguments #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE TemplateHaskell #-}
 
--- | DearImGui bindings for https://github.com/epezent/implot
-module DearImGui.Plot where
+{-|
+Module: DearImGui.Plot
 
-import Control.Monad.IO.Class (MonadIO, liftIO)
+Main ImPlot module, exporting the functions to make plots happen in Gui.
+-}
+
+module DearImGui.Plot
+  ( -- * Context Creation and Access
+    Raw.Plot.PlotContext(..)
+  , Raw.Plot.createPlotContext
+  , Raw.Plot.destroyPlotContext
+  , Raw.Plot.getCurrentPlotContext
+  , Raw.Plot.setCurrentPlotContext
+
+    -- * Demo so you can play with all features
+  , Raw.Plot.showPlotDemoWindow
+  )
+  where
+
+-- base
+import Control.Monad
+  ( when )
+import Data.Bool
+import Data.Foldable
+  ( foldl' )
 import Foreign
 import Foreign.C
-import qualified Language.C.Inline as C
-import qualified Language.C.Inline.Cpp as Cpp
+import qualified GHC.Foreign as Foreign
+import System.IO
+  ( utf8 )
 
-C.context (Cpp.cppCtx <> C.bsCtx)
-C.include "implot.h"
-Cpp.using "namespace ImPlot"
+-- dear-imgui
+import DearImGui.Enums
+import DearImGui.Structs
+import qualified DearImGui.Raw as Raw
+import qualified DearImGui.Raw.Plot as Raw.Plot
+import qualified DearImGui.Raw.Font as Raw.Font
+import qualified DearImGui.Raw.ListClipper as Raw.ListClipper
 
-newtype Context = Context (Ptr ())
+-- managed
+import qualified Control.Monad.Managed as Managed
 
-createContext :: MonadIO m => m Context
-createContext = liftIO do
-  Context <$> [C.exp| void* { CreateContext() } |]
+-- StateVar
+import Data.StateVar
+  ( HasGetter(get), HasSetter, ($=!) )
 
-destroyContext :: MonadIO m => Context -> m ()
-destroyContext (Context contextPtr) = liftIO do
-  [C.exp| void { DestroyContext((ImPlotContext*)$(void* contextPtr)); } |]
+-- transformers
+import Control.Monad.IO.Class
+  ( MonadIO, liftIO )
 
-beginPlot :: MonadIO m => String -> m Bool
-beginPlot name = liftIO do
-  withCString name \namePtr ->
-    (0 /=) <$> [C.exp| bool { BeginPlot($(char* namePtr)) } |]
+-- unliftio
+import UnliftIO (MonadUnliftIO)
+import UnliftIO.Exception (bracket, bracket_)
 
-endPlot :: MonadIO m => m ()
-endPlot = liftIO do
-  [C.exp| void { EndPlot(); } |]
+-- vector
+import qualified Data.Vector as V
+import qualified Data.Vector.Storable as VS
+import qualified Data.Vector.Unboxed as VU
 
 plotLine :: (MonadIO m) => String -> [Float] -> [Float] -> m ()
-plotLine desc xs ys = liftIO $ do
+plotLine label xs ys = liftIO $ do
   let size = fromIntegral $ length xs
   withCString desc \descPtr -> do
     withArray (map realToFrac xs) \xsPtr -> do
       withArray (map realToFrac ys) \ysPtr -> do
-        [C.exp| void { PlotLine( $(char* descPtr), $(float *xsPtr), $(float *ysPtr), $(int size) ) } |]
+        Raw.Plot.plotLine label xsPtr ysPtr size
 
 setNextPlotLimits :: MonadIO m => (Double, Double) -> (Double, Double) -> m ()
-setNextPlotLimits (minX, maxX) (minY, maxY) =
-  liftIO [C.exp| void { SetNextPlotLimits( $(double minX'), $(double maxX'), $(double minY'), $(double maxY') ) } |]
+setNextPlotLimits (minX, maxX) (minY, maxY) = liftIO $ do
+  Raw.Plot.setNextPlotLimits (minX', maxX') (minY', maxY')
   where
     minX' = realToFrac minX
     maxX' = realToFrac maxX

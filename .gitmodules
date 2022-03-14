@@ -1,6 +1,8 @@
 [submodule "implot"]
 	path = implot
 	url = https://github.com/epezent/implot
+	branch = v0.13
 [submodule "imgui"]
 	path = imgui
 	url = https://github.com/ocornut/imgui
+	branch = v1.87
