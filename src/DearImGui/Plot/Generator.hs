@@ -5,7 +5,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TemplateHaskell #-}
 
-module DearImGui.Generator
+module DearImGui.Plot.Generator
   ( declareEnumerations, enumerationsTypesTable )
   where
 
@@ -56,8 +56,8 @@ import qualified Data.Text.IO as Text
   ( readFile )
 
 -- dear-imgui-generator
-import qualified DearImGui.Generator.Parser as Parser
-  ( headers )
+import qualified DearImGui.Plot.Generator.Parser as Parser
+  ( plotHeaders )
 import DearImGui.Generator.Tokeniser
   ( Tok, tokenise )
 import DearImGui.Generator.Types
@@ -71,32 +71,33 @@ import DearImGui.Generator.Types
 headers :: Headers ( TH.Name, TH.Name )
 headers = $( do
   currentPath <- TH.loc_filename <$> TH.location
+  let
+    patchEnums :: Text.Text -> Text.Text
+    patchEnums = Text.replace "ImGuiCond_None" "0"
+               . Text.replace "ImGuiCond_Always" "1 << 0"
+               . Text.replace "ImGuiCond_Once" "1 << 1"
   basicHeaders <- TH.runIO do
-    headersPath  <- canonicalizePath ( takeDirectory currentPath <> "/../../imgui/imgui.h" )
-    headersSource <- Text.readFile headersPath
-    tokensImGui <- case tokenise headersSource of
-      Left  err  -> error ( "Couldn't tokenise Dear ImGui headers:\n\n" <> show err )
-      Right toks -> pure toks
-    headersPath  <- canonicalizePath ( takeDirectory currentPath <> "/../../implot/implot.h" )
-    headersSource <- Text.readFile headersPath
+    headersPath  <- canonicalizePath ( takeDirectory currentPath <> "/../../../implot/implot.h" )
+    headersSource <- patchEnums <$> Text.readFile headersPath
     tokensImPlot <- case tokenise headersSource of
       Left  err  -> error ( "Couldn't tokenise Dear ImPlot headers:\n\n" <> show err )
       Right toks -> pure toks
-    let tokens = tokensImGui<>tokensImPlot
-    case Megaparsec.parse Parser.headers "" tokens of
+    case Megaparsec.parse Parser.plotHeaders "" tokensImPlot of
       Left  err -> do
         let
           errorPos :: Int
           errorPos = Megaparsec.errorOffset . NonEmpty.head $ Megaparsec.bundleErrors err
           prev, rest :: [ Tok ]
-          ( prev, rest ) = second ( take 15 ) . splitAt 5 . drop ( errorPos - 5 ) $ tokens
+          ( prev, rest ) = second ( take 15 ) . splitAt 5 . drop ( errorPos - 5 ) $ tokensImPlot
         error $
-          "Couldn't parse Dear ImGui headers:\n\n" <>
+          "Couldn't parse Dear ImPlot headers:\n\n" <>
           ( unlines ( map Megaparsec.parseErrorPretty . toList $ Megaparsec.bundleErrors err ) ) <> "\n" <>
           ( unlines ( map show prev ) <> "\n\n" <> unlines ( map show rest ) )
       Right res -> pure res
   TH.lift $ generateNames basicHeaders
   )
+
+
 
 --------------------------------------------------------------------------------
 -- Generating TH splices.

@@ -26,6 +26,9 @@ module DearImGui.Plot
 
     -- * Demo so you can play with all features
   , Raw.Plot.showPlotDemoWindow
+
+    -- * TEST
+  , plotLine
   )
   where
 
@@ -72,16 +75,16 @@ import qualified Data.Vector.Unboxed as VU
 plotLine :: (MonadIO m) => String -> [Float] -> [Float] -> m ()
 plotLine label xs ys = liftIO $ do
   let size = fromIntegral $ length xs
-  withCString desc \descPtr -> do
+  withCString label \labelPtr -> do
     withArray (map realToFrac xs) \xsPtr -> do
       withArray (map realToFrac ys) \ysPtr -> do
-        Raw.Plot.plotLine label xsPtr ysPtr size
+        Raw.Plot.plotLine labelPtr xsPtr ysPtr size
 
-setNextPlotLimits :: MonadIO m => (Double, Double) -> (Double, Double) -> m ()
-setNextPlotLimits (minX, maxX) (minY, maxY) = liftIO $ do
-  Raw.Plot.setNextPlotLimits (minX', maxX') (minY', maxY')
-  where
-    minX' = realToFrac minX
-    maxX' = realToFrac maxX
-    minY' = realToFrac minY
-    maxY' = realToFrac maxY
+-- setNextPlotLimits :: MonadIO m => (Double, Double) -> (Double, Double) -> m ()
+-- setNextPlotLimits (minX, maxX) (minY, maxY) = liftIO $ do
+--   Raw.Plot.setNextPlotLimits (minX', maxX') (minY', maxY')
+--   where
+--     minX' = realToFrac minX
+--     maxX' = realToFrac maxX
+--     minY' = realToFrac minY
+--     maxY' = realToFrac maxY

@@ -7,6 +7,20 @@ library
   exposed-modules:
     DearImGui.Raw.Plot
     DearImGui.Plot
+  other-modules:
+    DearImGui.Plot.Generator
+    DearImGui.Plot.Generator.Parser
+    DearImGui.Plot.Context
+    DearImGui.Plot.Enums
+    DearImGui.Plot.Structs
+    --- from imgui via symlink:
+    DearImGui.Generator
+    DearImGui.Generator.Parser
+    DearImGui.Generator.Tokeniser
+    DearImGui.Generator.Types
+    DearImGui.Structs
+    DearImGui.Enums
+    DearImGui.Context
   hs-source-dirs:
     src
   default-language:
@@ -22,7 +36,7 @@ library
     stdc++
   include-dirs:
     implot
-    imgui
+    dear-imgui.hs/imgui
   build-depends: base
                , StateVar
                , containers
@@ -30,3 +44,15 @@ library
                , inline-c
                , inline-c-cpp
                , managed
+               , template-haskell
+               , directory
+               , filepath
+               , text
+               , megaparsec
+               , parser-combinators
+               , scientific
+               , unordered-containers
+               , th-lift
+               , transformers
+               , vector
+               , unliftio

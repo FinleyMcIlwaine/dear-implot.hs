@@ -1,5 +1,3 @@
 packages: *.cabal
-package dear-imgui
-  flags: -sdl +glfw
 package dear-implot
   ghc-options: -Wall -Wcompat -fno-warn-unused-do-bind

@@ -10,7 +10,7 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
 
-module DearImGui.Enums where
+module DearImGui.Plot.Enums where
 
 -- base
 import GHC.Exts

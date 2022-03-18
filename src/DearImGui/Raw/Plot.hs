@@ -27,7 +27,7 @@ module DearImGui.Raw.Plot
   , endPlot
 
   , plotLine
-  , setNextPlotLimits
+  -- , setNextPlotLimits
   ) where
 
 -- base
@@ -39,10 +39,12 @@ import System.IO.Unsafe
   ( unsafePerformIO )
 
 -- dear-imgui
+import DearImGui
 import DearImGui.Context
-  ( imguiContext, implotContext )
-import DearImGui.Enums
-import DearImGui.Structs
+import DearImGui.Plot.Context
+  ( implotContext )
+import DearImGui.Plot.Enums
+import DearImGui.Plot.Structs
 import DearImGui.Raw.DrawList (DrawList(..))
 
 -- inline-c
@@ -97,10 +99,10 @@ endPlot :: MonadIO m => m ()
 endPlot = liftIO do
   [C.exp| void { EndPlot(); } |]
 
-plotLine :: MonadIO m => CString -> Ptr Float -> Ptr Float -> CInt -> m ()
+plotLine :: MonadIO m => CString -> Ptr CFloat -> Ptr CFloat -> CInt -> m ()
 plotLine label xsPtr ysPtr size = liftIO do
-   [C.exp| void { PlotLine( $(char* descPtr), $(float *xsPtr), $(float *ysPtr), $(int size) ) } |]
+   [C.exp| void { PlotLine( $(char* label), $(float *xsPtr), $(float *ysPtr), $(int size) ) } |]
 
-setNextPlotLimits :: MonadIO m => (Double, Double) -> (Double, Double) -> m ()
-setNextPlotLimits (minX, maxX) (minY, maxY) = liftIO do
-  [C.exp| void { SetNextPlotLimits( $(double minX), $(double maxX), $(double minY), $(double maxY) ) } |]
+-- setNextPlotLimits :: MonadIO m => (CDouble, CDouble) -> (CDouble, CDouble) -> m ()
+-- setNextPlotLimits (minX, maxX) (minY, maxY) = liftIO do
+--   [C.exp| void { SetNextPlotLimits( $(double minX), $(double maxX), $(double minY), $(double maxY) ) } |]
