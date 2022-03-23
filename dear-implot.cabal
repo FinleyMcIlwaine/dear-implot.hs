@@ -2,6 +2,21 @@ cabal-version: 3.0
 name: dear-implot
 version: 1.0.0
 build-type: Simple
+extra-source-files:
+  README.md,
+  CONTRIBUTING.md,
+  implot/*.h,
+  implot/LICENSE,
+  dear-imgui.hs/imgui/*.h,
+  dear-imgui.hs/imgui/LICENSE.txt
+
+flag use-wchar32
+  description:
+    Use 32-bit for ImWchar (default is 16-bit) to support unicode planes 1-16. (e.g. point beyond 0xFFFF like emoticons, dingbats, symbols, shapes, ancient languages, etc...)
+  default:
+    True
+  manual:
+    True
 
 library
   exposed-modules:
@@ -27,20 +42,28 @@ library
     Haskell2010
   ghc-options:
     -Wall
+  install-includes:
+    implot/implot.h
+    implot/implot_internal.h
   cxx-sources:
     implot/implot.cpp
+    implot/implot_demo.cpp
     implot/implot_items.cpp
   cxx-options:
     -std=c++11
   extra-libraries:
     stdc++
+    --HSdear-imgui-1.4.0-inplace
   include-dirs:
     implot
     dear-imgui.hs/imgui
+  if flag(use-wchar32)
+    cxx-options: -DIMGUI_USE_WCHAR32
+    cpp-options: -DIMGUI_USE_WCHAR32
   build-depends: base
                , StateVar
                , containers
-               , dear-imgui >= 1.4.0
+               , dear-imgui == 1.4.0
                , inline-c
                , inline-c-cpp
                , managed

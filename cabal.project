@@ -1,3 +1,6 @@
 packages: *.cabal
+          dear-imgui.hs
 package dear-implot
   ghc-options: -Wall -Wcompat -fno-warn-unused-do-bind
+
+shared: true

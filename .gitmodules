@@ -4,4 +4,4 @@
 	branch = v0.13
 [submodule "dear-imgui.hs"]
 	path = dear-imgui.hs
-	url = https://github.com/haskell-game/dear-imgui.hs
+	url = https://github.com/drezil/dear-imgui.hs
