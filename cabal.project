@@ -3,4 +3,4 @@ packages: *.cabal
 package dear-implot
   ghc-options: -Wall -Wcompat -fno-warn-unused-do-bind
 
-shared: true
+-- shared: true
