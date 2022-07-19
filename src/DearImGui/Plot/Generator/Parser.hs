@@ -99,6 +99,7 @@ plotHeaders = do
       (   ( Left  <$> try ignoreDefine)
       <|> ( Right <$> enumeration enumNamesAndTypes)
       <|> ( Left  <$> ignoreStruct)
+      <|> ( Left  <$> cppConditionalIgnore)
       )
       ( namedSection "Callbacks" )
 
@@ -438,6 +439,13 @@ cppDirective f = token ( \case { BeginCPP a -> f a; _ -> Nothing } ) mempty
 cppConditional :: MonadParsec e [Tok] m => m ()
 cppConditional = do
   void $ cppDirective ( \case { "ifdef" -> Just True; "ifndef" -> Just False; _ -> Nothing } )
+  -- assumes no nesting
+  void $ skipManyTill anySingle ( cppDirective ( \case { "endif" -> Just (); _ -> Nothing } ) )
+  void $ skipManyTill anySingle ( single EndCPPLine )
+
+cppConditionalIgnore :: MonadParsec e [Tok] m => m ()
+cppConditionalIgnore = do
+  void $ cppDirective ( \case { "ifdef" -> Just (); "ifndef" -> Just (); "if" -> Just (); _ -> Nothing } )
   -- assumes no nesting
   void $ skipManyTill anySingle ( cppDirective ( \case { "endif" -> Just (); _ -> Nothing } ) )
   void $ skipManyTill anySingle ( single EndCPPLine )
