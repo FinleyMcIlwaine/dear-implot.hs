@@ -27,6 +27,9 @@ module DearImGui.Plot
     -- * Demo so you can play with all features
   , Raw.Plot.showPlotDemoWindow
 
+    -- * Plot Creation
+  , withPlot
+
     -- * TEST
   , plotLine
   )
@@ -79,6 +82,11 @@ plotLine label xs ys = liftIO $ do
     withArray (map realToFrac xs) \xsPtr -> do
       withArray (map realToFrac ys) \ysPtr -> do
         Raw.Plot.plotLine labelPtr xsPtr ysPtr size
+
+withPlot :: (MonadIO m) => String -> m () -> m ()
+withPlot p a = Raw.Plot.beginPlot p >>= \case
+    False -> return ()
+    True -> a >> Raw.Plot.endPlot
 
 -- setNextPlotLimits :: MonadIO m => (Double, Double) -> (Double, Double) -> m ()
 -- setNextPlotLimits (minX, maxX) (minY, maxY) = liftIO $ do
