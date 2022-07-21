@@ -41,10 +41,15 @@ library
   default-language:
     Haskell2010
   ghc-options:
-    -Wall
+    -Wall -static -dynamic-too
   install-includes:
     implot/implot.h
     implot/implot_internal.h
+    imgui/imgui.h
+    imgui/imgui_internal.h
+    imgui/imstb_rectpack.h
+    imgui/imstb_textedit.h
+    imgui/imstb_truetype.h
   cxx-sources:
     implot/implot.cpp
     implot/implot_demo.cpp
@@ -53,9 +58,6 @@ library
     -std=c++11
   extra-libraries:
     stdc++
-    HSdear-imgui-2.0.0-inplace-ghc8.10.7
-  extra-bundled-libraries:
-    HSdear-implot-1.0.0-inplace
   include-dirs:
     implot
     dear-imgui.hs/imgui
