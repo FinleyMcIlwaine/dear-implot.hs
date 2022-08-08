@@ -51,8 +51,7 @@ library
     src
   default-language:
     Haskell2010
-  ghc-options:
-    -Wall -static -dynamic-too
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints -Wderiving-defaults -Wmissing-deriving-strategies -static -dynamic-too
   install-includes:
     implot/implot.h
     implot/implot_internal.h
@@ -84,7 +83,7 @@ library
   build-depends: base
                , StateVar
                , containers
-               , dear-imgui == 2.0.0
+               , dear-imgui == 2.1.0
                , inline-c
                , inline-c-cpp
                , managed

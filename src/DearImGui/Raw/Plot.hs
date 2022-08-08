@@ -27,7 +27,7 @@ module DearImGui.Raw.Plot
   , endPlot
 
   , plotLine
-  -- , setNextPlotLimits
+  , setupAxisLimits
   ) where
 
 -- base
@@ -103,6 +103,8 @@ plotLine :: MonadIO m => CString -> Ptr CFloat -> Ptr CFloat -> CInt -> m ()
 plotLine label xsPtr ysPtr size = liftIO do
    [C.exp| void { PlotLine( $(char* label), $(float *xsPtr), $(float *ysPtr), $(int size) ) } |]
 
--- setNextPlotLimits :: MonadIO m => (CDouble, CDouble) -> (CDouble, CDouble) -> m ()
--- setNextPlotLimits (minX, maxX) (minY, maxY) = liftIO do
---   [C.exp| void { SetNextPlotLimits( $(double minX), $(double maxX), $(double minY), $(double maxY) ) } |]
+setupAxisLimits :: MonadIO m => ImAxis -> CDouble -> CDouble -> Maybe ImPlotCond -> m ()
+setupAxisLimits (ImAxis axis) minA maxA (Just (ImPlotCond cond)) = liftIO do
+  [C.exp| void { SetupAxisLimits( $(int axis), $(double minA), $(double maxA), $(int cond) ) } |]
+setupAxisLimits (ImAxis axis) minA maxA Nothing = liftIO do
+  [C.exp| void { SetupAxisLimits( $(int axis), $(double minA), $(double maxA) ) } |]

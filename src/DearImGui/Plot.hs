@@ -29,6 +29,7 @@ module DearImGui.Plot
 
     -- * Plot Creation
   , withPlot
+  , setupAxisLimits
 
     -- * TEST
   , plotLine
@@ -50,6 +51,8 @@ import System.IO
 -- dear-imgui
 import DearImGui.Enums
 import DearImGui.Structs
+import DearImGui.Plot.Enums
+import DearImGui.Plot.Structs
 import qualified DearImGui.Raw as Raw
 import qualified DearImGui.Raw.Plot as Raw.Plot
 import qualified DearImGui.Raw.Font as Raw.Font
@@ -75,24 +78,28 @@ import qualified Data.Vector as V
 import qualified Data.Vector.Storable as VS
 import qualified Data.Vector.Unboxed as VU
 
-plotLine :: (MonadIO m) => String -> [Float] -> [Float] -> m ()
+plotLine :: (MonadIO m) => String -> VS.Vector Float -> VS.Vector Float -> m ()
 plotLine label xs ys = liftIO $ do
-  let size = fromIntegral $ length xs
+  let (xsPtr, xsLen) = VS.unsafeToForeignPtr0 xs
+      (ysPtr, ysLen) = VS.unsafeToForeignPtr0 ys
+  when (xsLen /= ysLen) $ error $ "Vectors have not equal length: x " <> show xsLen <> " /= y " <> show ysLen
   withCString label \labelPtr -> do
-    withArray (map realToFrac xs) \xsPtr -> do
-      withArray (map realToFrac ys) \ysPtr -> do
-        Raw.Plot.plotLine labelPtr xsPtr ysPtr size
+    withForeignPtr xsPtr $ \xsPtr' -> do
+      withForeignPtr ysPtr $ \ysPtr' -> do
+        -- CFloat = CFloat Float -> ptr-cast is no problem
+        Raw.Plot.plotLine labelPtr (castPtr xsPtr') (castPtr ysPtr') (fromIntegral xsLen)
 
 withPlot :: (MonadIO m) => String -> m () -> m ()
 withPlot p a = Raw.Plot.beginPlot p >>= \case
     False -> return ()
     True -> a >> Raw.Plot.endPlot
 
--- setNextPlotLimits :: MonadIO m => (Double, Double) -> (Double, Double) -> m ()
--- setNextPlotLimits (minX, maxX) (minY, maxY) = liftIO $ do
---   Raw.Plot.setNextPlotLimits (minX', maxX') (minY', maxY')
---   where
---     minX' = realToFrac minX
---     maxX' = realToFrac maxX
---     minY' = realToFrac minY
---     maxY' = realToFrac maxY
+setupAxisLimits :: MonadIO m => (Double, Double) -> (Double, Double) -> Maybe Int -> m ()
+setupAxisLimits (minX, maxX) (minY, maxY) _ = liftIO $ do
+  Raw.Plot.setupAxisLimits ImAxis_X1 minX' maxX' Nothing
+  Raw.Plot.setupAxisLimits ImAxis_Y1 minY' maxY' Nothing
+  where
+    minX' = realToFrac minX
+    maxX' = realToFrac maxX
+    minY' = realToFrac minY
+    maxY' = realToFrac maxY
