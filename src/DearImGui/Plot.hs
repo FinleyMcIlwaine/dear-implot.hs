@@ -78,7 +78,7 @@ import qualified Data.Vector as V
 import qualified Data.Vector.Storable as VS
 import qualified Data.Vector.Unboxed as VU
 
-plotLine :: (MonadIO m) => String -> VS.Vector Float -> VS.Vector Float -> m ()
+plotLine :: (MonadUnliftIO m) => String -> VS.Vector Float -> VS.Vector Float -> m ()
 plotLine label xs ys = liftIO $ do
   let (xsPtr, xsLen) = VS.unsafeToForeignPtr0 xs
       (ysPtr, ysLen) = VS.unsafeToForeignPtr0 ys
@@ -89,12 +89,12 @@ plotLine label xs ys = liftIO $ do
         -- CFloat = CFloat Float -> ptr-cast is no problem
         Raw.Plot.plotLine labelPtr (castPtr xsPtr') (castPtr ysPtr') (fromIntegral xsLen)
 
-withPlot :: (MonadIO m) => String -> m () -> m ()
-withPlot p a = Raw.Plot.beginPlot p >>= \case
+withPlot :: (MonadUnliftIO m) => String -> m () -> m ()
+withPlot p a = bracket (Raw.Plot.beginPlot p) (const Raw.Plot.endPlot) $ \case
     False -> return ()
-    True -> a >> Raw.Plot.endPlot
+    True -> a
 
-setupAxisLimits :: MonadIO m => (Double, Double) -> (Double, Double) -> Maybe Int -> m ()
+setupAxisLimits :: MonadUnliftIO m => (Double, Double) -> (Double, Double) -> Maybe Int -> m ()
 setupAxisLimits (minX, maxX) (minY, maxY) _ = liftIO $ do
   Raw.Plot.setupAxisLimits ImAxis_X1 minX' maxX' Nothing
   Raw.Plot.setupAxisLimits ImAxis_Y1 minY' maxY' Nothing
