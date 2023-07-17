@@ -40,7 +40,7 @@ import System.IO.Unsafe
 
 -- dear-imgui
 import DearImGui
-import DearImGui.Context
+import DearImGui.Raw.Context
 import DearImGui.Plot.Context
   ( implotContext )
 import DearImGui.Plot.Enums

@@ -24,6 +24,8 @@ import Data.Traversable
   ( for )
 import Foreign.Storable
   ( Storable )
+import Data.Coerce
+  ( coerce )
 
 -- containers
 import Data.Map.Strict
@@ -165,7 +167,7 @@ declareEnumeration finiteEnumName countName ( Enumeration {..} ) = do
       pure ( finiteEnumInst : )
     else pure id
 
-  synonyms <- for patterns \ ( patternName, patternValue, CommentText _patDoc ) -> do
+  synonyms <- for patterns \ ( patternName, patternValue, CommentText patDoc ) -> do
     let
       patNameStr :: String
       patNameStr = Text.unpack patternName
@@ -173,7 +175,7 @@ declareEnumeration finiteEnumName countName ( Enumeration {..} ) = do
     patSynSig <- TH.patSynSigD patName ( TH.conT tyName )
     pat       <-
 #if MIN_VERSION_template_haskell(2,18,0)
-      ( if   Text.null _patDoc
+      ( if   Text.null patDoc
         then TH.patSynD
         else
           \ nm args dir pat ->

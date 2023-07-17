@@ -98,7 +98,7 @@ plotHeaders = do
     manyTill
       (   ( Left  <$> try ignoreDefine)
       <|> ( Right <$> enumeration enumNamesAndTypes)
-      <|> ( Left  <$> ignoreStruct)
+      <|> ( Left  <$> try ignoreStruct)
       <|> ( Left  <$> cppConditionalIgnore)
       )
       ( namedSection "Callbacks" )
@@ -210,7 +210,7 @@ enumeration enumNamesAndTypes = do
     enumTypeName = ()
   ( underlyingType, forwardDoc ) <- case HashMap.lookup enumName enumNamesAndTypes of
     Just res -> pure res
-    Nothing  -> customFailure ( MissingForwardDeclaration { enumName } )
+    Nothing  -> customFailure ( MissingForwardDeclaration { enumName, library = enumNamesAndTypes } )
   let
     docs :: [Comment]
     docs = forwardDoc : CommentText "" : inlineDocs
@@ -438,6 +438,7 @@ cppDirective f = token ( \case { BeginCPP a -> f a; _ -> Nothing } ) mempty
 
 cppConditional :: MonadParsec e [Tok] m => m ()
 cppConditional = do
+  void $ many comment
   void $ cppDirective ( \case { "ifdef" -> Just True; "ifndef" -> Just False; _ -> Nothing } )
   -- assumes no nesting
   void $ skipManyTill anySingle ( cppDirective ( \case { "endif" -> Just (); _ -> Nothing } ) )
@@ -445,6 +446,7 @@ cppConditional = do
 
 cppConditionalIgnore :: MonadParsec e [Tok] m => m ()
 cppConditionalIgnore = do
+  void $ many comment
   void $ cppDirective ( \case { "ifdef" -> Just (); "ifndef" -> Just (); "if" -> Just (); _ -> Nothing } )
   -- assumes no nesting
   void $ skipManyTill anySingle ( cppDirective ( \case { "endif" -> Just (); _ -> Nothing } ) )

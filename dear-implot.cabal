@@ -46,7 +46,7 @@ library
     DearImGui.Generator.Types
     DearImGui.Structs
     DearImGui.Enums
-    DearImGui.Context
+    DearImGui.Raw.Context
   hs-source-dirs:
     src
   default-language:
@@ -65,7 +65,7 @@ library
     implot/implot_demo.cpp
     implot/implot_items.cpp
   cxx-options:
-    -std=c++11
+    -std=c++11 -DIMGUI_DEFINE_MATH_OPERATORS
   extra-libraries:
     stdc++
   include-dirs:
@@ -83,7 +83,7 @@ library
   build-depends: base
                , StateVar
                , containers
-               , dear-imgui == 2.1.0
+               , dear-imgui == 2.1.3
                , inline-c
                , inline-c-cpp
                , managed
