@@ -66,8 +66,8 @@ library
     implot/implot_items.cpp
   cxx-options:
     -std=c++11 -DIMGUI_DEFINE_MATH_OPERATORS
-  extra-libraries:
-    stdc++
+  cpp-options:
+    -std=c++11
   include-dirs:
     implot
     dear-imgui.hs/imgui
@@ -99,3 +99,4 @@ library
                , transformers
                , vector
                , unliftio
+               , system-cxx-std-lib
