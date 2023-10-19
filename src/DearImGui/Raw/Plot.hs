@@ -14,7 +14,7 @@ Module: DearImGui.Raw.Plot
 
 Main ImPlot Raw module.
 -}
-module DearImGui.Raw.Plot 
+module DearImGui.Raw.Plot
   ( PlotContext(..)
   , createPlotContext
   , destroyPlotContext
@@ -28,6 +28,7 @@ module DearImGui.Raw.Plot
 
   , plotLine
   , setupAxisLimits
+  , setNextAxesToFit
   ) where
 
 -- base
@@ -89,6 +90,10 @@ setCurrentPlotContext (PlotContext contextPtr) = liftIO do
 showPlotDemoWindow :: (MonadIO m) => m ()
 showPlotDemoWindow = liftIO do
   [C.exp| void { ShowDemoWindow(); } |]
+
+setNextAxesToFit :: MonadIO m => m ()
+setNextAxesToFit = liftIO do
+    [C.exp| void { SetNextAxesToFit() } |]
 
 beginPlot :: MonadIO m => String -> m Bool
 beginPlot name = liftIO do
